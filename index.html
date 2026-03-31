@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#00ff9d">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>FUTURE WORK - Orientation</title>
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%2300ff9d'/%3E%3Ctext x='50' y='55' text-anchor='middle' fill='%23000' font-size='40' font-weight='bold'%3EFW%3C/text%3E%3Ctext x='50' y='85' text-anchor='middle' fill='%23000' font-size='14'%3EFUTURE%3C/text%3E%3C/svg%3E">
+  <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22FUTURE%20WORK%22,%22short_name%22:%22FutureWork%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%230a0f0a%22,%22theme_color%22:%22%2300ff9d%22,%22icons%22:[{%22src%22:%22data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Crect%20width='100'%20height='100'%20fill='%2300ff9d'/%3E%3Ctext%20x='50'%20y='55'%20text-anchor='middle'%20fill='%23000'%20font-size='40'%20font-weight='bold'%3EFW%3C/text%3E%3Ctext%20x='50'%20y='85'%20text-anchor='middle'%20fill='%23000'%20font-size='14'%3EFUTURE%3C/text%3E%3C/svg%3E%22,%22sizes%22:%22any%22}]}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    
+    const firebaseConfig = {
+      apiKey: "AIzaSyA65zrYwAHCjoxmWGyW4hYGGbt0Y2jpNR4",
+      authDomain: "future-work-app-cea8b.firebaseapp.com",
+      projectId: "future-work-app-cea8b",
+      storageBucket: "future-work-app-cea8b.firebasestorage.app",
+      messagingSenderId: "398428199869",
+      appId: "1:398428199869:web:59e736b4a51011f487d0d4"
+    };
+    
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const provider = new GoogleAuthProvider();
+    
+    window.fb = { auth, db, provider, signInWithPopup, signOut, onAuthStateChanged, doc, setDoc, getDoc, updateDoc, arrayUnion };
+  </script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+    body { background: linear-gradient(135deg, #0a0f0a, #0a1a0f); color: #00ff9d; min-height: 100vh; padding: 20px; }
+    .page { display: none; max-width: 800px; margin: auto; animation: fade 0.3s; }
+    .active { display: block; }
+    @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+    h1 { font-size: 2.2rem; text-align: center; text-shadow: 0 0 15px #00ff9d; margin-bottom: 10px; }
+    h2 { font-size: 1.6rem; text-align: center; margin-bottom: 20px; }
+    .logo { width: 100px; height: 100px; background: #00ff9d; border-radius: 50%; margin: 20px auto; display: flex; align-items: center; justify-content: center; }
+    .logo i { font-size: 3rem; color: #000; }
+    button { background: #00ff9d; color: #000; border: none; padding: 12px 28px; border-radius: 40px; font-size: 1rem; font-weight: bold; cursor: pointer; margin: 8px; transition: 0.2s; }
+    button:hover { transform: scale(1.02); box-shadow: 0 0 15px #00ff9d; }
+    .btn-outline { background: transparent; border: 1px solid #00ff9d; color: #00ff9d; }
+    .lang-bar { position: fixed; top: 10px; right: 10px; background: #1a2a1a; padding: 6px 12px; border-radius: 30px; display: flex; gap: 8px; z-index: 100; }
+    .lang-bar button { background: none; color: #00ff9d; padding: 4px 10px; margin: 0; font-size: 0.8rem; }
+    .lang-bar button.active { background: #00ff9d; color: #000; }
+    .question-card { background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); padding: 18px; margin: 15px 0; border-radius: 16px; border-left: 4px solid #00ff9d; text-align: left; }
+    .question-card p { font-weight: bold; margin-bottom: 12px; }
+    .question-card label { display: block; margin: 8px 0; cursor: pointer; color: #ddd; }
+    .question-card input { margin-right: 10px; accent-color: #00ff9d; }
+    .question-card input[type="text"] { width: 100%; padding: 10px; background: #111; border: 1px solid #00ff9d; border-radius: 10px; color: white; }
+    .metier-card { background: rgba(0,0,0,0.7); padding: 16px; margin: 12px 0; border-radius: 14px; border-left: 4px solid #00ff9d; text-align: left; }
+    .metier-card strong { font-size: 1.2rem; color: #00ff9d; display: block; margin-bottom: 8px; }
+    .badge { background: rgba(0,255,157,0.2); padding: 4px 12px; border-radius: 30px; font-size: 0.75rem; display: inline-block; margin-top: 8px; }
+    .affiliate-links { background: rgba(0,255,157,0.1); padding: 16px; border-radius: 16px; margin: 20px 0; }
+    .affiliate-links a { display: flex; align-items: center; gap: 10px; background: #1e2a1e; padding: 10px; margin: 8px 0; border-radius: 12px; color: white; text-decoration: none; }
+    .share-buttons { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin: 20px 0; }
+    .share-btn { padding: 8px 18px; border-radius: 40px; color: white; }
+    .whatsapp { background: #25D366; }
+    .instagram { background: linear-gradient(45deg, #405DE6, #833AB4, #FD1D1D); }
+    .facebook { background: #1877F2; }
+    .user-info { background: rgba(0,255,157,0.15); padding: 12px; border-radius: 40px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; }
+    .user-info img { width: 36px; height: 36px; border-radius: 50%; }
+    .history-section { background: rgba(0,255,157,0.1); border-radius: 16px; padding: 16px; margin-top: 20px; max-height: 250px; overflow-y: auto; }
+    .history-item { background: #1a2a1a; padding: 10px; margin: 8px 0; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; }
+    .footer-links { text-align: center; margin-top: 25px; }
+    .footer-links a { color: #888; text-decoration: none; margin: 0 10px; font-size: 0.8rem; cursor: pointer; }
+    .about-content, .terms-content { background: rgba(0,0,0,0.5); padding: 20px; border-radius: 20px; text-align: left; line-height: 1.6; color: #ccc; }
+    .about-content h3, .terms-content h3 { color: #00ff9d; margin: 15px 0 10px 0; }
+    .about-content p, .terms-content p { margin: 8px 0; }
+    .about-content ul, .terms-content ul { margin-left: 20px; }
+    @media (max-width: 600px) { h1 { font-size: 1.8rem; } h2 { font-size: 1.4rem; } }
+  </style>
+</head>
+<body>
+
+<div class="lang-bar">
+  <button onclick="setLang('fr')" id="btnFr">FR</button>
+  <button onclick="setLang('en')" id="btnEn">EN</button>
+  <button onclick="setLang('es')" id="btnEs">ES</button>
+</div>
+
+<!-- PAGE ACCUEIL -->
+<div id="page1" class="page active">
+  <div class="logo"><i class="fas fa-briefcase"></i></div>
+  <h1 id="title1">FUTURE WORK</h1>
+  <p id="sub1" style="text-align:center; margin-bottom:25px;">Découvre le métier qui te correspond</p>
+  <div id="userStatus"></div>
+  <div style="text-align:center;">
+    <button id="startBtn" onclick="goToPage(3)">COMMENCER</button>
+  </div>
+  <div class="footer-links">
+    <a onclick="goToPage(5)">ℹ️ À propos</a>
+    <a onclick="goToPage(6)">📜 Conditions</a>
+  </div>
+</div>
+
+<!-- PAGE CONNEXION -->
+<div id="page2" class="page">
+  <h2 id="loginTitle">CONNEXION</h2>
+  <button id="googleLogin" style="background:#4285F4; color:white; display:flex; align-items:center; justify-content:center; gap:10px; margin:auto;"><i class="fab fa-google"></i> <span id="googleText">Se connecter avec Google</span></button>
+  <div style="text-align:center; margin-top:20px;"><button class="btn-outline" onclick="goToPage(3)">Passer</button></div>
+</div>
+
+<!-- PAGE QUESTIONNAIRE -->
+<div id="page3" class="page">
+  <h2 id="quizTitle">TEST D'ORIENTATION</h2>
+  <p id="quizDesc" style="text-align:center; margin-bottom:15px;">Choisis ce qui te correspond</p>
+  <div id="questionsContainer"></div>
+  <div style="text-align:center;">
+    <button id="seeResultsBtn" onclick="calculerResultats()">VOIR RÉSULTATS</button>
+  </div>
+  <div id="errorMsg" style="color:#ff6b6b; text-align:center; margin-top:15px; display:none;"></div>
+</div>
+
+<!-- PAGE RÉSULTATS -->
+<div id="page4" class="page">
+  <h2 id="resultsTitle">🎯 TES MÉTIERS</h2>
+  <div id="resultsContainer"></div>
+  
+  <div class="affiliate-links">
+    <h3 id="affTitle">🎓 Formations</h3>
+    <a href="https://openclassrooms.com" target="_blank"><i class="fas fa-laptop-code"></i> OpenClassrooms</a>
+    <a href="https://www.coursera.org" target="_blank"><i class="fas fa-graduation-cap"></i> Coursera</a>
+    <a href="https://www.udemy.com" target="_blank"><i class="fas fa-chalkboard-user"></i> Udemy</a>
+    <p id="affNote" style="font-size:11px; color:#aaa; margin-top:10px;">En t'inscrivant, tu soutiens FUTURE WORK</p>
+  </div>
+  
+  <div class="share-buttons">
+    <button class="share-btn whatsapp" onclick="partager('whatsapp')"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+    <button class="share-btn instagram" onclick="partager('instagram')"><i class="fab fa-instagram"></i> Instagram</button>
+    <button class="share-btn facebook" onclick="partager('facebook')"><i class="fab fa-facebook-f"></i> Facebook</button>
+  </div>
+  
+  <div id="historySection" style="display:none;" class="history-section">
+    <h3 id="historyTitle">📜 Historique</h3>
+    <div id="historyList"></div>
+    <button id="clearHistoryBtn" class="btn-outline" style="margin-top:10px;" onclick="clearHistory()">🗑️ Effacer</button>
+  </div>
+  
+  <div style="text-align:center; margin-top:20px;">
+    <button class="btn-outline" onclick="recommencer()">RECOMMENCER</button>
+  </div>
+</div>
+
+<!-- PAGE À PROPOS -->
+<div id="page5" class="page">
+  <h2>ℹ️ À PROPOS</h2>
+  <div class="about-content">
+    <h3>FUTURE WORK</h3>
+    <p>Application d'orientation professionnelle</p>
+    
+    <h3>NOTRE MISSION</h3>
+    <p>Aider les jeunes à découvrir le métier qui correspond à leurs passions, compétences et personnalité.</p>
+    
+    <h3>COMMENT ÇA MARCHE ?</h3>
+    <p>1. Répondez à 7 questions sur vos préférences<br>2. Notre algorithme analyse vos réponses<br>3. Obtenez 3 métiers qui vous correspondent</p>
+    
+    <h3>NOS MÉTIERS</h3>
+    <p>43 métiers couvrant : Informatique, Santé, Arts, Commerce, Sport, Artisanat, Sciences</p>
+    
+    <h3>FONCTIONNALITÉS</h3>
+    <p>🔐 Connexion Google • 📜 Historique • 🌍 Traduction FR/EN/ES • 📱 Mode hors ligne • 💾 Installation écran d'accueil</p>
+    
+    <h3>CRÉATEUR</h3>
+    <p><strong>jusco25</strong> - Version 1.02 - Mars 2026</p>
+    
+    <h3>CONTACT</h3>
+    <p>📧 futurework@gmail.com</p>
+  </div>
+  <div style="text-align:center; margin-top:20px;"><button onclick="goToPage(1)">RETOUR</button></div>
+</div>
+
+<!-- PAGE CONDITIONS -->
+<div id="page6" class="page">
+  <h2>📜 CONDITIONS D'UTILISATION</h2>
+  <div class="terms-content">
+    <h3>1. ACCEPTATION</h3>
+    <p>En utilisant FUTURE WORK, vous acceptez ces conditions.</p>
+    
+    <h3>2. DESCRIPTION</h3>
+    <p>Application d'orientation avec 43 métiers, 7 questions, sauvegarde des résultats (optionnelle).</p>
+    
+    <h3>3. COMPTE ET DONNÉES</h3>
+    <p>Connexion Google facultative. Données : nom, email, résultats des tests. Aucune donnée vendue.</p>
+    
+    <h3>4. UTILISATION</h3>
+    <p>Les résultats sont indicatifs. L'utilisateur est seul responsable de ses choix.</p>
+    
+    <h3>5. LIENS AFFILIÉS</h3>
+    <p>OpenClassrooms, Coursera, Udemy. FUTURE WORK perçoit une commission sur achats.</p>
+    
+    <h3>6. PROPRIÉTÉ</h3>
+    <p>L'application est la propriété de son créateur. Reproduction interdite sans autorisation.</p>
+    
+    <h3>7. LIMITATION</h3>
+    <p>FUTURE WORK n'est pas responsable des choix d'orientation ou des contenus tiers.</p>
+    
+    <h3>8. MODIFICATIONS</h3>
+    <p>Ces conditions peuvent être modifiées. Les utilisateurs seront informés.</p>
+    
+    <h3>9. CONTACT</h3>
+    <p>📧 futurework@gmail.com</p>
+    <p style="margin-top:15px; color:#00ff9d;">Dernière mise à jour : 31 Mars 2026</p>
+  </div>
+  <div style="text-align:center; margin-top:20px;"><button onclick="goToPage(1)">RETOUR</button></div>
+</div>
+
+<div id="installBanner" style="position:fixed; bottom:20px; left:20px; right:20px; background:#1a2a1a; border:1px solid #00ff9d; border-radius:50px; padding:12px 20px; display:none; align-items:center; justify-content:space-between; z-index:1000;">
+  <span>📱 Installer FUTURE WORK</span>
+  <button id="installBtn" style="background:#00ff9d; color:#000;">Installer</button>
+</div>
+
+<script>
+// ==================== TRADUCTIONS ====================
+const texts = {
+  fr: { title1:"FUTURE WORK", sub1:"Découvre le métier qui te correspond", startBtn:"COMMENCER", loginTitle:"CONNEXION", googleText:"Se connecter avec Google", quizTitle:"TEST D'ORIENTATION", quizDesc:"Choisis ce qui te correspond", seeResultsBtn:"VOIR RÉSULTATS", resultsTitle:"🎯 TES MÉTIERS", affTitle:"🎓 Formations", affNote:"En t'inscrivant, tu soutiens FUTURE WORK", historyTitle:"📜 Historique", clearHistory:"🗑️ Effacer", errorMsg:"❌ Réponds à toutes les questions !", shareText:"🎯 Mes résultats FUTURE WORK !" },
+  en: { title1:"FUTURE WORK", sub1:"Discover the career that suits you", startBtn:"START", loginTitle:"LOGIN", googleText:"Sign in with Google", quizTitle:"ORIENTATION TEST", quizDesc:"Choose what suits you", seeResultsBtn:"SEE RESULTS", resultsTitle:"🎯 YOUR CAREERS", affTitle:"🎓 Training", affNote:"By signing up, you support FUTURE WORK", historyTitle:"📜 History", clearHistory:"🗑️ Clear", errorMsg:"❌ Answer all questions!", shareText:"🎯 My FUTURE WORK results!" },
+  es: { title1:"FUTURE WORK", sub1:"Descubre la profesión que te conviene", startBtn:"COMENZAR", loginTitle:"INICIAR SESIÓN", googleText:"Iniciar con Google", quizTitle:"TEST DE ORIENTACIÓN", quizDesc:"Elige lo que te conviene", seeResultsBtn:"VER RESULTADOS", resultsTitle:"🎯 TUS PROFESIONES", affTitle:"🎓 Formación", affNote:"Al registrarte, apoyas FUTURE WORK", historyTitle:"📜 Historial", clearHistory:"🗑️ Borrar", errorMsg:"❌ ¡Responde todas las preguntas!", shareText:"🎯 ¡Mis resultados de FUTURE WORK!" }
+};
+let lang = 'fr';
+function setLang(l) { lang = l; updateTexts(); }
+function updateTexts() { let t = texts[lang]; document.getElementById('title1').innerText = t.title1; document.getElementById('sub1').innerText = t.sub1; document.getElementById('startBtn').innerText = t.startBtn; document.getElementById('loginTitle').innerText = t.loginTitle; document.getElementById('googleText').innerText = t.googleText; document.getElementById('quizTitle').innerText = t.quizTitle; document.getElementById('quizDesc').innerText = t.quizDesc; document.getElementById('seeResultsBtn').innerText = t.seeResultsBtn; document.getElementById('resultsTitle').innerText = t.resultsTitle; document.getElementById('affTitle').innerText = t.affTitle; document.getElementById('affNote').innerText = t.affNote; document.getElementById('historyTitle') && (document.getElementById('historyTitle').innerText = t.historyTitle); document.getElementById('clearHistoryBtn') && (document.getElementById('clearHistoryBtn').innerText = t.clearHistory); document.querySelectorAll('.lang-bar button').forEach(btn=>btn.classList.remove('active')); document.getElementById(`btn${l.toUpperCase()}`).classList.add('active'); }
+
+// ==================== 43 MÉTIERS COMPLETS ====================
+const metiers = [
+  { nom:"Développeur web", desc:"Crée des sites et applications web.", form:"BAC+2 à BAC+5", qual:"Logique, curiosité", sal:"30-50k€/an", mat:["Maths","Informatique","Anglais"], cat:["Bureau","Seul","Intellectuelle","Long","Créer"] },
+  { nom:"Infirmier", desc:"Soigne et accompagne les patients.", form:"BAC+3", qual:"Empathie, rigueur", sal:"22-35k€/an", mat:["SVT","Chimie","Français"], cat:["Hôpital","Public","Manuelle","Moyen","Aider"] },
+  { nom:"Graphiste", desc:"Conçoit des visuels pour les marques.", form:"BAC+2 à BAC+5", qual:"Créativité", sal:"25-45k€/an", mat:["Arts","Informatique"], cat:["Atelier","Seul","Créative","Moyen","Créer"] },
+  { nom:"Chanteur", desc:"Interprète des chansons.", form:"Conservatoire", qual:"Voix, sensibilité", sal:"Variable", mat:["Musique","Français"], cat:["Atelier","Public","Créative","Peu","Créer"] },
+  { nom:"Dessinateur", desc:"Crée des illustrations, BD.", form:"Beaux-Arts", qual:"Créativité", sal:"25-40k€/an", mat:["Arts","Français"], cat:["Atelier","Seul","Créative","Peu","Créer"] },
+  { nom:"Avocat", desc:"Défend ses clients.", form:"BAC+5 droit", qual:"Éloquence", sal:"35-80k€/an", mat:["Français","Anglais","Histoire"], cat:["Bureau","Public","Intellectuelle","Long","Aider"] },
+  { nom:"Pilote ligne", desc:"Pilote des avions.", form:"École pilotage", qual:"Sang-froid", sal:"50-150k€/an", mat:["Maths","Physique","Anglais"], cat:["Extérieur","Equipe","Manuelle","Long","Argent"] },
+  { nom:"Professeur", desc:"Enseigne et transmet.", form:"BAC+5", qual:"Pédagogie", sal:"25-50k€/an", mat:["Français","Maths"], cat:["Bureau","Public","Relationnelle","Long","Aider"] },
+  { nom:"Entrepreneur", desc:"Crée son entreprise.", form:"Parcours varié", qual:"Audace", sal:"Variable", mat:["Économie","Anglais"], cat:["Bureau","Equipe","Relationnelle","Peu","Argent"] },
+  { nom:"Couturier", desc:"Crée des vêtements.", form:"CAP mode", qual:"Précision", sal:"20-35k€/an", mat:["Arts","Technique"], cat:["Atelier","Seul","Manuelle","Court","Créer"] },
+  { nom:"Pâtissier", desc:"Prépare des desserts.", form:"CAP", qual:"Créativité", sal:"20-35k€/an", mat:["Maths","Chimie"], cat:["Atelier","Seul","Manuelle","Court","Créer"] },
+  { nom:"Mécanicien", desc:"Répare les véhicules.", form:"CAP", qual:"Minutie", sal:"22-35k€/an", mat:["Maths","Physique"], cat:["Atelier","Seul","Manuelle","Court","Argent"] },
+  { nom:"Agriculteur", desc:"Exploite des terres.", form:"Bac pro", qual:"Résistance", sal:"20-40k€/an", mat:["SVT","Chimie"], cat:["Extérieur","Seul","Manuelle","Court","Aider"] },
+  { nom:"Écrivain", desc:"Écrit des livres.", form:"Autodidacte", qual:"Imagination", sal:"Variable", mat:["Français","Philo"], cat:["Bureau","Seul","Créative","Peu","Créer"] },
+  { nom:"Journaliste", desc:"Transmet l'info.", form:"BAC+3", qual:"Curiosité", sal:"25-45k€/an", mat:["Français","Anglais","Histoire"], cat:["Bureau","Public","Intellectuelle","Long","Aider"] },
+  { nom:"Présentateur TV", desc:"Anime des émissions.", form:"Écoles journalisme", qual:"Charisme", sal:"30-200k€", mat:["Français","Anglais"], cat:["Bureau","Public","Relationnelle","Long","Argent"] },
+  { nom:"Chimiste", desc:"Étudie la matière.", form:"BAC+5", qual:"Rigueur", sal:"30-60k€/an", mat:["Chimie","Maths","Physique"], cat:["Bureau","Equipe","Intellectuelle","Long","Aider"] },
+  { nom:"Animateur radio", desc:"Anime des émissions radio.", form:"Écoles radio", qual:"Voix, humour", sal:"25-80k€", mat:["Français","Musique"], cat:["Bureau","Public","Créative","Moyen","Créer"] },
+  { nom:"Caméraman", desc:"Filme pour le cinéma.", form:"BTS audiovisuel", qual:"Précision", sal:"25-45k€/an", mat:["Technique","Info"], cat:["Atelier","Equipe","Manuelle","Moyen","Créer"] },
+  { nom:"Joueur foot", desc:"Footballeur pro.", form:"Centre formation", qual:"Sportif", sal:"20k€ à millions", mat:["EPS"], cat:["Extérieur","Equipe","Manuelle","Peu","Argent"] },
+  { nom:"Joueur tennis", desc:"Tennisman pro.", form:"Entraînement", qual:"Mental", sal:"Variable", mat:["EPS"], cat:["Extérieur","Seul","Manuelle","Peu","Argent"] },
+  { nom:"Joueur basket", desc:"Basketteur pro.", form:"Centre formation", qual:"Sportif", sal:"30k€ à millions", mat:["EPS"], cat:["Extérieur","Equipe","Manuelle","Peu","Argent"] },
+  { nom:"Joueur handball", desc:"Handballeur pro.", form:"Centre formation", qual:"Sportif", sal:"25-200k€", mat:["EPS"], cat:["Extérieur","Equipe","Manuelle","Peu","Argent"] },
+  { nom:"Pilote course", desc:"Pilote auto pro.", form:"Pilotage", qual:"Réflexes", sal:"Variable", mat:["EPS","Physique"], cat:["Extérieur","Equipe","Manuelle","Peu","Argent"] },
+  { nom:"Hacker éthique", desc:"Teste la sécurité.", form:"Certifications", qual:"Logique", sal:"40-100k€/an", mat:["Info","Maths","Anglais"], cat:["Bureau","Seul","Intellectuelle","Moyen","Argent"] },
+  { nom:"Électronicien", desc:"Conçoit des circuits.", form:"BTS", qual:"Précision", sal:"28-45k€/an", mat:["Physique","Maths"], cat:["Bureau","Seul","Intellectuelle","Moyen","Argent"] },
+  { nom:"Chef cuisinier", desc:"Dirige la cuisine.", form:"CAP", qual:"Leadership", sal:"30-60k€/an", mat:["Cuisine","Gestion"], cat:["Atelier","Equipe","Manuelle","Moyen","Créer"] },
+  { nom:"Acteur", desc:"Joue des rôles.", form:"Cours art dramatique", qual:"Expressivité", sal:"Variable", mat:["Théâtre","Français"], cat:["Atelier","Public","Créative","Peu","Créer"] },
+  { nom:"Architecte", desc:"Conçoit des bâtiments.", form:"BAC+5", qual:"Créativité", sal:"30-60k€/an", mat:["Maths","Dessin","Physique"], cat:["Bureau","Equipe","Créative","Long","Créer"] },
+  { nom:"Policier", desc:"Assure la sécurité.", form:"Concours", qual:"Courage", sal:"25-50k€/an", mat:["EPS","Français","Droit"], cat:["Extérieur","Public","Manuelle","Moyen","Aider"] },
+  { nom:"Économiste", desc:"Analyse l'économie.", form:"BAC+5", qual:"Logique", sal:"35-80k€/an", mat:["Maths","Éco","Anglais"], cat:["Bureau","Equipe","Intellectuelle","Long","Argent"] },
+  { nom:"Comptable", desc:"Gère les comptes.", form:"BAC+2", qual:"Rigueur", sal:"28-50k€/an", mat:["Maths","Compta"], cat:["Bureau","Seul","Intellectuelle","Moyen","Argent"] },
+  { nom:"Monteur vidéo", desc:"Monte des vidéos.", form:"BTS", qual:"Patience", sal:"25-45k€/an", mat:["Info","Technique"], cat:["Bureau","Seul","Créative","Moyen","Créer"] },
+  { nom:"Coiffeur", desc:"Coupe les cheveux.", form:"CAP", qual:"Créativité", sal:"20-35k€/an", mat:["Technique","Chimie"], cat:["Atelier","Public","Manuelle","Court","Aider"] },
+  { nom:"Hôtesse air", desc:"Accueille en vol.", form:"Formation", qual:"Sourire", sal:"25-45k€/an", mat:["Anglais","Français","Géo"], cat:["Extérieur","Public","Relationnelle","Moyen","Argent"] },
+  { nom:"Menuisier", desc:"Fabrique des meubles.", form:"CAP", qual:"Précision", sal:"22-38k€/an", mat:["Dessin","Maths"], cat:["Atelier","Seul","Manuelle","Court","Créer"] },
+  { nom:"Plombier", desc:"Installe des canalisations.", form:"CAP", qual:"Rigueur", sal:"25-45k€/an", mat:["Maths","Physique"], cat:["Extérieur","Public","Manuelle","Court","Argent"] },
+  { nom:"Photographe", desc:"Prend des photos.", form:"Écoles photo", qual:"Créativité", sal:"25-40k€/an", mat:["Technique","Physique"], cat:["Extérieur","Seul","Créative","Moyen","Créer"] },
+  { nom:"Secrétaire", desc:"Gère l'administratif.", form:"Bac+2", qual:"Organisation", sal:"22-35k€/an", mat:["Français","Anglais","Info"], cat:["Bureau","Public","Relationnelle","Court","Aider"] },
+  { nom:"Réceptionniste", desc:"Accueille les clients.", form:"Bac", qual:"Sourire", sal:"20-30k€/an", mat:["Anglais","Français"], cat:["Bureau","Public","Relationnelle","Court","Aider"] },
+  { nom:"Cordonnier", desc:"Répare les chaussures.", form:"CAP", qual:"Minutieux", sal:"20-30k€/an", mat:["Technique"], cat:["Atelier","Seul","Manuelle","Court","Aider"] },
+  { nom:"Ingénieur IA", desc:"Développe l'IA.", form:"BAC+5", qual:"Logique", sal:"45-100k€/an", mat:["Maths","Info","Anglais"], cat:["Bureau","Equipe","Intellectuelle","Long","Argent"] },
+  { nom:"Gestionnaire", desc:"Gère une équipe.", form:"BAC+3", qual:"Leadership", sal:"30-60k€/an", mat:["Compta","Éco"], cat:["Bureau","Equipe","Relationnelle","Long","Argent"] },
+  { nom:"Fabricant jouets", desc:"Fabrique des jouets.", form:"CAP", qual:"Créativité", sal:"22-38k€/an", mat:["Dessin","Maths"], cat:["Atelier","Equipe","Manuelle","Moyen","Créer"] }
+];
+
+// ==================== QUESTIONS ====================
+const questionsList = [
+  { text:"1. Environnement de travail préféré ?", type:"check", opts:["Bureau","Extérieur","Hôpital","Atelier"] },
+  { text:"2. Comment aimes-tu travailler ?", type:"check", opts:["Seul","En équipe","Au contact du public"] },
+  { text:"3. Type d'activité qui te motive ?", type:"check", opts:["Manuelle","Intellectuelle","Créative","Relationnelle"] },
+  { text:"4. Niveau d'études souhaité ?", type:"radio", opts:["Court","Moyen","Long","Peu importe"] },
+  { text:"5. Valeur la plus importante ?", type:"check", opts:["Aider","Argent","Créer","Temps libre"] },
+  { text:"6. Matières où tu es à l'aise ?", type:"text", placeholder:"Ex: Maths, Anglais, SVT..." },
+  { text:"7. Matières que tu aimes ?", type:"text", placeholder:"Ex: Histoire, Musique, Arts..." }
+];
+
+function afficherQuestions() {
+  let container = document.getElementById("questionsContainer");
+  if(!container) return;
+  container.innerHTML = "";
+  questionsList.forEach((q, idx) => {
+    let div = document.createElement("div");
+    div.className = "question-card";
+    div.innerHTML = `<p>${q.text}</p>`;
+    if(q.type === "check") {
+      q.opts.forEach(opt => { div.innerHTML += `<label><input type="checkbox" name="q${idx}" value="${opt}"> ${opt}</label>`; });
+    } else if(q.type === "radio") {
+      q.opts.forEach(opt => { div.innerHTML += `<label><input type="radio" name="q${idx}" value="${opt}"> ${opt}</label>`; });
+    } else {
+      div.innerHTML += `<input type="text" name="q${idx}" placeholder="${q.placeholder}" style="width:100%;">`;
+    }
+    container.appendChild(div);
+  });
+}
+function getReponses() {
+  let rep = [];
+  for(let i=0; i<questionsList.length; i++) {
+    if(questionsList[i].type === "text") {
+      let inp = document.querySelector(`input[name="q${i}"]`);
+      if(!inp || !inp.value.trim()) return null;
+      rep.push(inp.value.trim().toLowerCase());
+    } else {
+      let selected = document.querySelectorAll(`input[name="q${i}"]:checked`);
+      if(selected.length === 0) return null;
+      rep.push(Array.from(selected).map(s=>s.value));
+    }
+  }
+  return rep;
+}
+
+function calculerResultats() {
+  let rep = getReponses();
+  let errDiv = document.getElementById("errorMsg");
+  if(!rep) { errDiv.style.display = "block"; errDiv.innerText = texts[lang].errorMsg; return; }
+  errDiv.style.display = "none";
+  
+  let matieresFortes = rep[5] ? rep[5].split(",").map(m=>m.trim()) : [];
+  let matieresAimees = rep[6] ? rep[6].split(",").map(m=>m.trim()) : [];
+  
+  let scores = metiers.map(m => {
+    let score = 0;
+    if(rep[0].includes(m.cat[0])) score += 5;
+    if(rep[1].includes(m.cat[1])) score += 4;
+    if(rep[2].some(a => m.cat[2].includes(a))) score += 4;
+    if(rep[3] === m.cat[3] || rep[3] === "Peu importe") score += 3;
+    if(rep[4].includes(m.cat[4])) score += 3;
+    let matM = m.mat.map(mm=>mm.toLowerCase());
+    matieresFortes.forEach(mf => { if(matM.some(mm=>mm.includes(mf))) score += 6; });
+    matieresAimees.forEach(ma => { if(matM.some(mm=>mm.includes(ma))) score += 2; });
+    return {...m, score};
+  });
+  
+  let top3 = scores.sort((a,b)=>b.score-a.score).slice(0,3);
+  currentResults = top3;
+  
+  let container = document.getElementById("resultsContainer");
+  container.innerHTML = "";
+  top3.forEach((m,i) => {
+    container.innerHTML += `<div class="metier-card"><strong>${i+1}. ${m.nom}</strong><p>📝 ${m.desc}</p><p>🎓 ${m.form}</p><p>⭐ ${m.qual}</p><p>💰 ${m.sal}</p><p>📚 ${m.mat.join(", ")}</p><span class="badge">Score: ${m.score} pts</span></div>`;
+  });
+  
+  if(currentUser) sauvegarderHistorique(currentUser.uid, top3);
+  goToPage(4);
+}
+
+let currentResults = null;
+function partager(reseau) {
+  let txt = texts[lang].shareText;
+  if(currentResults) txt = "🎯 " + currentResults.map((m,i)=>`${i+1}. ${m.nom}`).join(" | ") + "\n" + txt;
+  if(reseau === "whatsapp") window.open(`https://wa.me/?text=${encodeURIComponent(txt)}`,"_blank");
+  else if(reseau === "instagram") { alert("📸 Copie: " + txt); navigator.clipboard.writeText(txt); }
+  else { alert("📘 Copie: " + txt); navigator.clipboard.writeText(txt); }
+}
+
+function goToPage(num) {
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  document.getElementById(`page${num}`).classList.add("active");
+  if(num===3) afficherQuestions();
+}
+
+function recommencer() {
+  document.querySelectorAll("input").forEach(i=>{ if(i.type==="checkbox"||i.type==="radio") i.checked=false; if(i.type==="text") i.value=""; });
+  afficherQuestions();
+  goToPage(1);
+}
+
+// ==================== FIREBASE ====================
+let currentUser = null;
+const { auth, db, provider, signInWithPopup, signOut, onAuthStateChanged, doc, setDoc, getDoc, updateDoc, arrayUnion } = window.fb;
+
+document.getElementById("googleLogin")?.addEventListener("click", async () => {
+  try {
+    let res = await signInWithPopup(auth, provider);
+    alert(`Bienvenue ${res.user.displayName || "utilisateur"} !`);
+    goToPage(3);
+  } catch(e) { alert("Erreur: " + e.message); }
+});
+
+async function sauvegarderHistorique(uid, results) {
+  let userRef = doc(db, "users", uid);
+  let snap = await getDoc(userRef);
+  let data = { date: new Date().toISOString(), results: results.map(m=>({ nom: m.nom, score: m.score })) };
+  if(snap.exists()) await updateDoc(userRef, { history: arrayUnion(data) });
+  else await setDoc(userRef, { history: [data] });
+  chargerHistorique(uid);
+}
+
+async function chargerHistorique(uid) {
+  let userRef = doc(db, "users", uid);
+  let snap = await getDoc(userRef);
+  if(snap.exists()) {
+    let history = snap.data().history || [];
+    let section = document.getElementById("historySection");
+    let list = document.getElementById("historyList");
+    if(history.length === 0) { section.style.display = "none"; return; }
+    section.style.display = "block";
+    list.innerHTML = "";
+    history.slice().reverse().forEach((item, idx) => {
+      let d = new Date(item.date).toLocaleDateString();
+      let res = item.results.map((m,i)=>`${i+1}. ${m.nom}`).join(" | ");
+      list.innerHTML += `<div class="history-item"><span><strong>${d}</strong><br><small>${res}</small></span><button class="btn-outline" style="padding:5px 12px;" onclick="supprimerHistoriqueItem(${idx})">🗑️</button></div>`;
+    });
+  }
+}
+
+window.supprimerHistoriqueItem = async function(index) {
+  if(!currentUser) return;
+  let userRef = doc(db, "users", currentUser.uid);
+  let snap = await getDoc(userRef);
+  let history = snap.data().history || [];
+  history.splice(history.length - 1 - index, 1);
+  await updateDoc(userRef, { history: history });
+  chargerHistorique(currentUser.uid);
+};
+
+window.clearHistory = async function() {
+  if(!currentUser) return;
+  let userRef = doc(db, "users", currentUser.uid);
+  await updateDoc(userRef, { history: [] });
+  chargerHistorique(currentUser.uid);
+};
+
+onAuthStateChanged(auth, async (user) => {
+  currentUser = user;
+  let statusDiv = document.getElementById("userStatus");
+  if(statusDiv) {
+    if(user) {
+      chargerHistorique(user.uid);
+      statusDiv.innerHTML = `<div class="user-info"><img src="${user.photoURL || ''}" onerror="this.style.display='none'"><span>👋 ${user.displayName || user.email}</span><button class="btn-outline" onclick="signOut(auth); location.reload()">Déconnexion</button></div>`;
+    } else {
+      statusDiv.innerHTML = `<div style="text-align:center;"><button class="btn-outline" onclick="goToPage(2)">🔐 Se connecter</button></div>`;
+      document.getElementById("historySection").style.display = "none";
+    }
+  }
+});
+
+// PWA Installation
+let deferredPrompt;
+window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); deferredPrompt = e; document.getElementById("installBanner").style.display = "flex"; });
+document.getElementById("installBtn")?.addEventListener("click", async () => { if(deferredPrompt) { deferredPrompt.prompt(); let { outcome } = await deferredPrompt.userChoice; if(outcome === "accepted") document.getElementById("installBanner").style.display = "none"; deferredPrompt = null; } });
+
+// Service Worker
+if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(console.log);
+
+window.onload = () => { afficherQuestions(); setLang('fr'); };
+</script>
+</body>
+</html>
+
